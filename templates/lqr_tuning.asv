@@ -15,8 +15,8 @@ function [tuning_struct, i_opt] = lqr_tuning(x0,Q,params)
         tuning_struct(i,1).InitialCondition = x0;
         tuning_struct(i,1).Qdiag = Q(:,i);
         ctrl = LQR(diag(Q(:,i)), eye(params.model.nu), params);
-        [Xt,Ut,~] = simulate(x0, ctrl, params);
-        [s_max, y_max, u_max, J_u, df_max, vf_max, traj_feas] = traj_constraints(Xt,Ut,params);
+        [x,u,~] = simulate(x0, ctrl, params);
+        [s_max, y_max, u_max, J_u, df_max, vf_max, traj_feas] = traj_constraints(x,u,params);
         tuning_struct(i,1).MaxAbsPositionXZ = s_max;
         tuning_struct(i,1).MaxAbsPositionY = y_max;
         tuning_struct(i,1).MaxAbsThrust = u_max;
@@ -26,10 +26,10 @@ function [tuning_struct, i_opt] = lqr_tuning(x0,Q,params)
         tuning_struct(i,1).TrajFeasible = traj_feas;
     end
 
-    feasible_J = [];
+    feasible_J = zeros(m,1);
     for i = 1:m
         if tuning_struct(i,1).TrajFeasible
-            feasible_J(i) = tuning_struct(i,1).InputCost;
+            feasible_J(i,1) = tuning_struct(i,1).InputCost;
         end
     end
     if isempty(feasible_J)

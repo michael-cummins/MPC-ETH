@@ -1,0 +1,12 @@
+close all;
+clear;
+clc;
+
+q0 = [94; 0.1579; 300; 0.01; 0.1; 0.1];
+for i = 2:100
+    noise = [unifrnd(-10,10); unifrnd(-0.1,0.1); unifrnd()]
+    q0(:,i) = 
+end
+params = generate_params();
+x0 = params.model.InitialConditionA;
+[tuning_struct, iopt] = lqr_tuning(x0, q0, params);
