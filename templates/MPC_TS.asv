@@ -6,31 +6,23 @@
 % Please see the LICENSE file that has been included as part of this package.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-classdef MPC
+classdef MPC_TS
     properties
         yalmip_optimizer
     end
 
     methods
-        function obj = MPC(Q,R,N,params)
+        function obj = MPC_TS(Q,R,N,H,h,params)
+            % YOUR CODE HERE
             nu = params.model.nu;
             nx = params.model.nx;
 
             % define optimization variables
             U = sdpvar(repmat(nu,1,N),ones(1,N),'full');
             X0 = sdpvar(nx,1,'full');
-
-            % YOUR CODE HERE
-            A = params.model.A;
-            B = params.model.B;
-            [P,~,~] = idare(A,B,Q,R,[],[]);
-            objective = traj_cost(X0,U,Q,R) + X0'*P*X0; %not sure
-            
-            Hu = params.constraints.InputMatrix;
-            hu = params.constraints.InputRHS;
-            Hx = params.constraints.StateMatrix;
-            hx = params.constraints.StateRHS;
-            constraints =  ;  %it is not that
+           
+            objective = traj_cost(X0,U,Q,R); %not sure
+            constraints =  params.constraints;  %it is not that
             
             opts = sdpsettings('verbose',1,'solver','quadprog');
             obj.yalmip_optimizer = optimizer(constraints,objective,opts,X0,{U{1} objective});
@@ -41,7 +33,6 @@ classdef MPC
             tic;
             [optimizer_out,errorcode] = obj.yalmip_optimizer(x);
             solvetime = toc;
-            
             [u, objective] = optimizer_out{:};
 
             feasible = true;

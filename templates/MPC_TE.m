@@ -14,6 +14,21 @@ classdef MPC_TE
     methods
         function obj = MPC_TE(Q,R,N,params)
             % YOUR CODE HERE
+            nu = params.model.nu;
+            nx = params.model.nx;
+
+            % define optimization variables
+            U = sdpvar(repmat(nu,1,N),ones(1,N),'full');
+            X0 = sdpvar(nx,1,'full');
+           
+            objective = traj_cost(X0,U,Q,R); %not sure
+
+            Hu = params.constraints.InputMatrix;
+            hu = params.constraints.InputRHS;
+            Hx = params.constraints.StateMatrix;
+            hx = params.constraints.StateRHS;
+            constraints =  params.constraints;  %it is not that
+
             opts = sdpsettings('verbose',1,'solver','quadprog');
             obj.yalmip_optimizer = optimizer(constraints,objective,opts,X0,{U{1} objective});
         end
