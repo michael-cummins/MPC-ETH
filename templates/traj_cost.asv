@@ -8,9 +8,6 @@
 
 function J_Nt = traj_cost(Xt,Ut,Q,R)
     % YOUR CODE HERE
-    [~,Nt] = shape(Xt);
-    J_Nt = 0;
-    for i=1:Nt
-        J_Nt = J_Nt + Xt(:,i)'*Q*Xt(:,i) + Ut(:,i)'*R*Ut(:,i);
-    end
+    []
+    for i=1:
 end

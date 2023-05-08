@@ -21,10 +21,7 @@ classdef MPC
             X0 = sdpvar(nx,1,'full');
 
             % YOUR CODE HERE
-            A = params.model.A;
-            B = params.model.B;
-            [P,~,~] = idare(A,B,Q,R,[],[]);
-            objective = X0'*P*X0;
+            
             
             opts = sdpsettings('verbose',1,'solver','quadprog');
             obj.yalmip_optimizer = optimizer(constraints,objective,opts,X0,{U{1} objective});

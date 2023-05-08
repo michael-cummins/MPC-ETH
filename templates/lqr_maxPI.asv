@@ -21,7 +21,5 @@ function [H, h] = lqr_maxPI(Q,R,params)
     system.u.max = params.constraints.MaxAbsThrust;
 
     InvSet = system.invariantSet();
-    H = InvSet.H;
-    h = InvSet.h;
 end
 

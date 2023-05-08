@@ -18,7 +18,7 @@ function [s_max, y_max, u_max, J_u, df_max, vf_max, traj_feas] = traj_constraint
     y_max = max(abs(y)); % scalar
     [urow, ucol] = size(u);
     u = reshape(u, [urow*ucol, 1]);
-    u_max = max(norm(u, Inf));
+    u_max = max(norm(u, Inf));  %is it a scalar?
     J_u = u'*u; % scalar?
 
     xdot = state_traj(4,:);
