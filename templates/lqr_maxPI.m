@@ -11,17 +11,21 @@ function [H, h] = lqr_maxPI(Q,R,params)
     A = params.model.A;
     B = params.model.B;
     K = -dlqr(A,B,Q,R);
-    system = LTIsystem('A', A+B*K);
+    system = LTISystem('A', A+B*K);
 
-    xz_max = params.constraints.MaxAbsPositionXZ;
-    y_max = params.constraints.MaxAbsPositionY;
-    system.x.min = [-xz_max; -y_max; -xz_max];
-    system.x.max = [xz_max; y_max; xz_max];
-    system.u.min = -params.constraints.MaxAbsThrust;
-    system.u.max = params.constraints.MaxAbsThrust;
+    H_x = params.constraints.StateMatrix;
+    h_x = params.constraints.StateRHS;
+    H_u = params.constraints.InputMatrix;
+    h_u = params.constraints.InputRHS;
+
+    Xp = Polyhedron('A',[H_x; H_u*K], 'b', [h_x; h_u]);
+    
+    system.x.with('setConstraint');
+    system.x.setConstraint = Xp;
 
     InvSet = system.invariantSet();
-    H = InvSet.H;
-    h = InvSet.h;
+    He = InvSet.H;
+    H = He(:, 1:params.model.nx);
+    h = He(:,params.model.nx+1);
 end
 

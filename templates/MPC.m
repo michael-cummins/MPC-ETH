@@ -24,14 +24,23 @@ classdef MPC
             A = params.model.A;
             B = params.model.B;
             [P,~,~] = idare(A,B,Q,R,[],[]);
-            objective = traj_cost(X0,U,Q,R) + X0'*P*X0; %not sure
             
             Hu = params.constraints.InputMatrix;
             hu = params.constraints.InputRHS;
             Hx = params.constraints.StateMatrix;
             hx = params.constraints.StateRHS;
-            constraints =  ;  %it is not that
             
+
+            constraints = [];
+            objective = 0;
+            x = X0;
+            for k = 1:N
+                 objective = objective + x'*Q*x + U{k}'*R*U{k};
+                 constraints = [constraints, Hu*U{k} <= hu, Hx*x <= hx];
+                 x = A*x + B*U{k};
+            end
+            objective =  objective + x'*P*x;
+
             opts = sdpsettings('verbose',1,'solver','quadprog');
             obj.yalmip_optimizer = optimizer(constraints,objective,opts,X0,{U{1} objective});
         end

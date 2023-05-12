@@ -20,14 +20,24 @@ classdef MPC_TE
             % define optimization variables
             U = sdpvar(repmat(nu,1,N),ones(1,N),'full');
             X0 = sdpvar(nx,1,'full');
-           
-            objective = traj_cost(X0,U,Q,R); %not sure
 
             Hu = params.constraints.InputMatrix;
             hu = params.constraints.InputRHS;
             Hx = params.constraints.StateMatrix;
             hx = params.constraints.StateRHS;
-            constraints =  params.constraints;  %it is not that
+            
+            A = params.model.A;
+            B = params.model.B;
+
+            constraints = [];
+            objective = 0;
+            x = X0;
+            for k = 1:N
+                 objective = objective + x'*Q*x + U{k}'*R*U{k};
+                 constraints = [constraints, Hu*U{k} <= hu, Hx*x <= hx];
+                 x = A*x + B*U{k};
+            end
+            constraints = [constraints, x == 0];
 
             opts = sdpsettings('verbose',1,'solver','quadprog');
             obj.yalmip_optimizer = optimizer(constraints,objective,opts,X0,{U{1} objective});
