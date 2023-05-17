@@ -41,8 +41,8 @@ classdef MPC_TS_SC
                  x = A*x + B*U{k};
             end
   
-            objective =  objective + x'*P*x + e(:,N+1)'*S*e(:,N+1) + v*norm(e(:,N+1), Inf);
-            constraints = [constraints, H*x<=h];
+            objective =  objective + x'*P*x + e{N+1}'*S*e{N+1} + v*norm(e{N+1}, Inf);
+            constraints = [constraints, H*x<=h, e{N+1} >= 0];
                         
             opts = sdpsettings('verbose',1,'solver','quadprog','quadprog.TolFun',1e-8);
             obj.yalmip_optimizer = optimizer(constraints,objective,opts,X0, {U{1} objective});

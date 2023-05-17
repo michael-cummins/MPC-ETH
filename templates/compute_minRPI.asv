@@ -28,13 +28,13 @@ function [H_tube,h_tube,n_iter] = compute_minRPI(K_tube,params)
    
     
     
-    omega_new = X.copy();
-    
+    omega_new = X-W;
+    omega_new = omega_new.minHRep();
     n_iter = 0;
     
     while false
         n_iter = n_iter + 1;
-        omega_old = omega_new.minus(W);
+        omega_old = omega_new.copy();
         
         preW = Polyhedron(omega_old.A*(A-K_tube*B),omega_old.b);
 

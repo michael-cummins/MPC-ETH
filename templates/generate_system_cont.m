@@ -8,18 +8,13 @@
 
 function [Ac, Bc] = generate_system_cont(params)
     % YOUR CODE HERE
-    w = params.model.GravitationalParameter/(params.model.TargetRadius^3);
-    w = sqrt(w);
-    m = params.model.Mass;
-    syms xddot yddot zddot xdot zdot ydot x y z ux uy uz;
-    states = [x, y, z, xdot, ydot, zdot];
-    inputs = [ux, uy, uz];
-    xddot = 2*w*ydot + 3*(w^2)*x + ux/m;
-    yddot = -2*w*xdot + uy/m;
-    zddot = -(w^2)*z + uz/m;
-    
-    sys = [xdot; ydot; zdot; xddot; yddot; zddot];
-    Ac = double(subs(jacobian(sys,states),[states inputs],zeros(1,9)));
-    Bc = double(subs(jacobian(sys,inputs),[states inputs],zeros(1,9)));
+    w_n = sqrt(params.model.GravitationalParameter/(params.model.TargetRadius^3));
+    A_ = zeros(3,6);
+    A_(1,1) = 3*w_n*w_n;
+    A_(1,5) = 2*w_n;
+    A_(2,4) = -2*w_n;
+    A_(3,3) = -w_n*w_n;
+    Ac = [zeros(3,3), 1*eye(3); A_];
+    Bc = [zeros(3,3); (1/params.model.Mass)*eye(3)];
     
 end

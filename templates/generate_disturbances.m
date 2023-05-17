@@ -8,4 +8,9 @@
 
 function Wt = generate_disturbances(params)
     % YOUR CODE HERE
+    nx = params.model.nx;
+    N = params.model.HorizonLength;
+    max_d = params.constraints.MaxAbsDisturbance;
+    Wt = unifrnd(-max_d, max_d, nx, N);
+
 end
