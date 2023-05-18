@@ -35,7 +35,7 @@ classdef MPC_TS_SC
             constraints = [];
             objective = 0;
             X{1} = X0;
-            x = X0
+            
             for k = 1:N
                  objective = objective + X{k}'*Q*X{k} + U{k}'*R*U{k} + e{k}'*S*e{k} + v*norm(e{k}, Inf);
                  constraints = [constraints, ...
