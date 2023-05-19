@@ -9,43 +9,50 @@
 function [H_tube,h_tube,n_iter] = compute_minRPI(K_tube,params)
     A = params.model.A;
     B = params.model.B;
+    Ak = A+B*K_tube;
 
     nx = params.model.nx;
 
     H_x = params.constraints.StateMatrix;
     h_x = params.constraints.StateRHS;
     H_u = params.constraints.InputMatrix;
-    h_u = params.constraints.InputRHS;
+    %h_u = params.constraints.InputRHS;
 
     H_w = params.constraints.DisturbanceMatrix;
     h_w = params.constraints.DisturbanceRHS;
 
-    F = [H_x; H_u*K_tube];
-    f = [h_x; h_u];
+    %F = [H_x;H_u*K_tube];
+    %f = [h_x;h_u];
 
-    X = Polyhedron(F, f);
-    W = Polyhedron(H_w, h_w);
+    %X = Polyhedron('A',F,'b',f);
+    %X = X.minHRep();
+    W = Polyhedron('A',H_w,'b',h_w);
+
+    omega_new = W.copy();
    
-    
-    
-    omega_new = X-W;
-    omega_new = omega_new.minHRep();
     n_iter = 0;
-    
-    while false
+    figure()
+    while true
         n_iter = n_iter + 1;
         omega_old = omega_new.copy();
-        
-        preW = Polyhedron(omega_old.A*(A-K_tube*B),omega_old.b);
-
-        omega_new = omega_old.intersect(preW);
+        omega_old = omega_old.minHRep();
+    
+        %preW = Polyhedron('A', omega_old.A*Ak,'b', omega_old.b);
+        %preW = preW.minHRep();
+       
+        omega_new = omega_old + mtimes(Ak,W);
+        %omega_new = omega_old.copy().intersect(preW);
         omega_new = omega_new.minHRep();
-
-        if omega_new == omega_old
+        
+        plot(omega_new,'Color',[(n_iter/5) (0) (0)]);
+        %plot(omega_old,'Color',[(0) (0) (n_iter/20)]);
+        hold on;
+        
+        if eq(omega_new, omega_old)
             break
         end
+        Ak = Ak * Ak;
     end
-   
     H_tube = omega_new.A;
     h_tube = omega_new.b;
 end
