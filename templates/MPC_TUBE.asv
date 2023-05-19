@@ -22,7 +22,7 @@ classdef MPC_TUBE
             % define optimization variables
             V = sdpvar(repmat(nu,1,N),ones(1,N),'full');
             Z = sdpvar(repmat(nx,1,N+1),ones(1,N+1),'full');
-            
+            e = sdpvar(repmat(size(S, 1),1,N+1),ones(1,N+1),'full');
             X0 = sdpvar(nx,1,'full');
             % YOUR CODE HERE
             A = params.model.A;
@@ -35,19 +35,21 @@ classdef MPC_TUBE
             hx = params.constraints.StateRHS;
             
 
-            constraints = [H_tube*(X0-Z{1}) <= h_tube];
+            constraints = [];
             objective = 0;
-                       
+            Z{1} = X0;
+            
             for k = 1:N
-                 objective = objective + Z{k}'*Q*Z{k} + V{k}'*R*V{k};
+                 objective = objective + Z{k}'*Q*Z{k} + U{k}'*R*U{k} + e{k}'*S*e{k} + v*norm(e{k}, Inf);
                  constraints = [constraints, ...
-                                Hu*V{k} <= hu, ...
-                                Hx*Z{k} <= hx, ...
-                                Z{k+1} == A*Z{k} + B*V{k}];
+                                Hu*U{k} <= hu, ...
+                                Hx*X{k} <= hx + e{k}, ...
+                                e{k} >= 0, ...
+                                X{k+1} == (A+B*K_tube)*X{k}];
             end
   
-            objective =  objective + Z{N+1}'*P*Z{N+1};
-            constraints = [constraints, H_N*Z{N+1} <= h_N];
+            objective =  objective + X{N+1}'*P*X{N+1} + e{N+1}'*S*e{N+1} + v*norm(e{N+1}, Inf);
+            constraints = [constraints, H_N*X{N+1} <= h_N, Hx*X{N+1} <= hx + e{N+1}, e{N+1} >= 0];
 
             opts = sdpsettings('verbose',1,'solver','quadprog');
             obj.yalmip_optimizer = optimizer(constraints,objective,opts,X0,{V{1} Z{1} objective});
@@ -59,8 +61,7 @@ classdef MPC_TUBE
             [optimizer_out,errorcode] = obj.yalmip_optimizer(x);
             solvetime = toc;
             % YOUR CODE HERE
-            [v,z,objective] = optimizer_out{:};
-            u = v + obj.K_tube(x-z);
+            
             feasible = true;
             if (errorcode ~= 0)
                 feasible = false;
