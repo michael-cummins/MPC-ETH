@@ -16,28 +16,22 @@ function MPC_TS_SC_script()
     [ne,~] = size(params.constraints.StateRHS);
     
     x = x0;
-    S =10 *eye(ne);
-    v =100;
+    S = 10 *eye(ne);
+    v = 100;
     mpc_TS_SC = MPC_TS_SC(Q,R,N,H,h,S,v,params);
-    
    
     for i = 1:params.model.HorizonLength
-        i
         [U(:,i), ctrl_info] = mpc_TS.eval(x);
         [U_SC(:,i), ~] = mpc_TS_SC.eval(x);
         if ctrl_info.ctrl_feas
-            
             if U(:,i) - U_SC(:,i) > 1.0e-07
-                r = 'cest pas les memes'
                 break
             end
-        
         else 
-            r = 'unfeasible'
             break
         end
         x = A*x + B*U(:,i);
     end
-    clear
+    
     save MPC_TS_SC_params.mat S v 
 end

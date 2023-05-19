@@ -60,7 +60,7 @@ classdef MPC_TUBE
             solvetime = toc;
             % YOUR CODE HERE
             [v,z,objective] = optimizer_out{:};
-            u = v + obj.K_tube(x-z);
+            u = v + obj.K_tube*(x-z);
             feasible = true;
             if (errorcode ~= 0)
                 feasible = false;

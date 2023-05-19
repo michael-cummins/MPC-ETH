@@ -22,3 +22,5 @@ end
 % Exercise 12 - Simulation
 % Answer = No
 [struct, i] = lqr_tuning(params.model.InitialConditionB, Q, params);
+
+save lqr_tuning_script.mat Q tuning_struct
